@@ -1,0 +1,17 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.socialbu/socialbu",
+  "title": "SocialBu",
+  "description": "Manage authorized SocialBu posts, accounts, queues, analytics, automations, curated content, media, and social listening.",
+  "repository": {
+    "url": "https://github.com/socialbu/socialbu-agent",
+    "source": "github"
+  },
+  "version": "1.0.0",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://socialbu.com/mcp"
+    }
+  ]
+}

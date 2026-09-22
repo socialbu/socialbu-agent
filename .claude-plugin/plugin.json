@@ -1,0 +1,14 @@
+{
+  "name": "socialbu",
+  "version": "1.0.0",
+  "description": "Manage authorized SocialBu posts, accounts, queues, analytics, automations, curated content, media, and social listening.",
+  "author": {
+    "name": "SocialBu",
+    "email": "support@socialbu.com",
+    "url": "https://socialbu.com"
+  },
+  "homepage": "https://socialbu.com/mcp-server",
+  "repository": "https://github.com/socialbu/socialbu-agent",
+  "skills": ["./skills/socialbu"],
+  "keywords": ["socialbu", "social-media", "scheduling", "analytics", "automation", "mcp"]
+}

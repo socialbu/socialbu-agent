@@ -1,0 +1,22 @@
+{
+  "name": "socialbu",
+  "version": "1.0.0",
+  "description": "Manage authorized SocialBu posts, accounts, queues, analytics, automations, curated content, media, and social listening.",
+  "author": {
+    "name": "SocialBu",
+    "email": "support@socialbu.com",
+    "url": "https://socialbu.com"
+  },
+  "homepage": "https://socialbu.com/mcp-server",
+  "repository": "https://github.com/socialbu/socialbu-agent",
+  "logo": "assets/logo.svg",
+  "keywords": ["socialbu", "social media management", "schedule social media posts", "social media analytics", "social media automation"],
+  "skills": ["./skills/socialbu"],
+  "mcpServers": {
+    "socialbu": {
+      "type": "http",
+      "url": "https://socialbu.com/mcp",
+      "note": "Official SocialBu remote MCP server. The user signs in and approves access through OAuth on first connection."
+    }
+  }
+}

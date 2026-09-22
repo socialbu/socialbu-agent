@@ -1,0 +1,22 @@
+{
+  "name": "socialbu-agent",
+  "description": "Official SocialBu plugin for AI agents",
+  "owner": {
+    "name": "SocialBu",
+    "email": "support@socialbu.com"
+  },
+  "plugins": [
+    {
+      "name": "socialbu",
+      "description": "Manage authorized SocialBu posts, accounts, queues, analytics, automations, curated content, media, and social listening.",
+      "category": "productivity",
+      "source": {
+        "type": "local",
+        "path": "./"
+      },
+      "homepage": "https://socialbu.com/mcp-server",
+      "keywords": ["socialbu", "social media management", "social media scheduling", "social media analytics", "social media automation"],
+      "domains": ["socialbu.com"]
+    }
+  ]
+}

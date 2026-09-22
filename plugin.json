@@ -1,0 +1,37 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "socialbu",
+  "version": "1.0.0",
+  "description": "Manage authorized SocialBu posts, accounts, queues, analytics, automations, curated content, media, and social listening through AI agents.",
+  "author": {
+    "name": "SocialBu",
+    "email": "support@socialbu.com",
+    "url": "https://socialbu.com"
+  },
+  "homepage": "https://socialbu.com/mcp-server",
+  "repository": "https://github.com/socialbu/socialbu-agent",
+  "keywords": ["socialbu", "social-media", "scheduling", "publishing", "analytics", "automation", "mcp"],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "SocialBu",
+        "shortDescription": "Manage social media through SocialBu",
+        "longDescription": "Create and schedule posts, inspect connected accounts, work with queues, review analytics, manage automations, browse curated content, and handle social listening items in an authorized SocialBu workspace.",
+        "developerName": "SocialBu",
+        "category": "Productivity",
+        "capabilities": ["Read", "Write"],
+        "websiteURL": "https://socialbu.com/mcp-server",
+        "privacyPolicyURL": "https://socialbu.com/about/privacy",
+        "termsOfServiceURL": "https://socialbu.com/about/terms",
+        "defaultPrompt": [
+          "Show my connected SocialBu accounts.",
+          "Create a SocialBu draft for my selected account.",
+          "Summarize my recent SocialBu performance."
+        ],
+        "brandColor": "#0557F0",
+        "composerIcon": "./assets/icon.png",
+        "logo": "./assets/logo.png"
+      }
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "socialbu": {
+      "type": "http",
+      "url": "https://socialbu.com/mcp"
+    }
+  }
+}

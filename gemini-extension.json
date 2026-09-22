@@ -1,0 +1,11 @@
+{
+  "name": "socialbu",
+  "version": "1.0.0",
+  "description": "Manage authorized SocialBu posts, accounts, queues, analytics, automations, curated content, media, and social listening.",
+  "mcpServers": {
+    "socialbu": {
+      "httpUrl": "https://socialbu.com/mcp",
+      "description": "Official SocialBu remote MCP server. The user signs in and approves access through OAuth on first connection."
+    }
+  }
+}

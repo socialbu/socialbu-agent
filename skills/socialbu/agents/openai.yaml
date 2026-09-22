@@ -1,0 +1,16 @@
+interface:
+  display_name: "SocialBu"
+  short_description: "Manage social media through SocialBu"
+  brand_color: "#0557F0"
+  default_prompt: "Use $socialbu to show my connected SocialBu accounts."
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "socialbu"
+      description: "Official SocialBu remote MCP server"
+      transport: "streamable_http"
+      url: "https://socialbu.com/mcp"
+
+policy:
+  allow_implicit_invocation: true

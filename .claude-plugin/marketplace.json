@@ -1,0 +1,20 @@
+{
+  "name": "socialbu-agent",
+  "owner": {
+    "name": "SocialBu",
+    "email": "support@socialbu.com"
+  },
+  "metadata": {
+    "description": "Official SocialBu plugin for AI agents",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "socialbu",
+      "description": "Manage authorized SocialBu posts, accounts, queues, analytics, automations, curated content, media, and social listening.",
+      "source": "./",
+      "strict": false,
+      "skills": ["./"]
+    }
+  ]
+}
