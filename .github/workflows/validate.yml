@@ -18,3 +18,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: python scripts/validate.py
+      - run: pip install check-jsonschema==0.38.0
+      - run: check-jsonschema --schemafile https://agent-plugins.org/schemas/1.0.0/plugin.schema.json plugin.json
+      - run: check-jsonschema --schemafile https://agent-plugins.org/schemas/1.0.0/mcp.schema.json mcp.json
+      - run: check-jsonschema --schemafile https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json server.json

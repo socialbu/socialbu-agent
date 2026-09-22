@@ -1,7 +1,8 @@
 {
-  "name": "socialbu",
+  "name": "socialbu-agent",
   "version": "1.0.0",
   "description": "Manage authorized SocialBu posts, accounts, queues, analytics, automations, curated content, media, and social listening.",
+  "contextFileName": "GEMINI.md",
   "mcpServers": {
     "socialbu": {
       "httpUrl": "https://socialbu.com/mcp",

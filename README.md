@@ -81,6 +81,7 @@ SocialBu's inbox is not currently exposed by this MCP server. Available operatio
 | `.codex-plugin/` | Codex compatibility manifest |
 | `.grok-plugin/` | Grok Build compatibility metadata |
 | `gemini-extension.json` | Gemini CLI extension manifest |
+| `GEMINI.md` | Gemini CLI operating guidance |
 | `server.json` | Official MCP Registry metadata |
 
 ## Existing SocialBu CLI

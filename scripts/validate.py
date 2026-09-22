@@ -38,15 +38,37 @@ def validate_files() -> None:
         )
     }
 
-    assert manifests["plugin.json"]["version"] == VERSION
-    assert manifests["server.json"]["version"] == VERSION
-    assert manifests["gemini-extension.json"]["version"] == VERSION
+    for path in (
+        "plugin.json",
+        "server.json",
+        "gemini-extension.json",
+        ".codex-plugin/plugin.json",
+        ".claude-plugin/plugin.json",
+        ".grok-plugin/plugin.json",
+    ):
+        assert manifests[path]["version"] == VERSION, f"Version mismatch in {path}"
+
+    for path in (
+        "plugin.json",
+        ".codex-plugin/plugin.json",
+        ".claude-plugin/plugin.json",
+        ".grok-plugin/plugin.json",
+    ):
+        assert manifests[path]["name"] == "socialbu", f"Plugin name mismatch in {path}"
+
+    for path in (".claude-plugin/marketplace.json", ".grok-plugin/marketplace.json"):
+        assert manifests[path]["name"] == "socialbu-agent", f"Marketplace name mismatch in {path}"
+        assert manifests[path]["plugins"][0]["name"] == "socialbu"
+
+    assert manifests["gemini-extension.json"]["name"] == "socialbu-agent"
+    assert manifests["gemini-extension.json"]["contextFileName"] == "GEMINI.md"
     assert manifests["mcp.json"]["mcpServers"]["socialbu"]["url"] == MCP_URL
     assert manifests[".mcp.json"]["mcpServers"]["socialbu"]["url"] == MCP_URL
     assert manifests["server.json"]["remotes"] == [
         {"type": "streamable-http", "url": MCP_URL}
     ]
     assert manifests["gemini-extension.json"]["mcpServers"]["socialbu"]["httpUrl"] == MCP_URL
+    assert manifests[".grok-plugin/plugin.json"]["mcpServers"]["socialbu"]["url"] == MCP_URL
 
     plugin = manifests["plugin.json"]
     interface = plugin["extensions"]["com.openai"]["interface"]
@@ -57,6 +79,7 @@ def validate_files() -> None:
     assert skill.startswith("---\nname: socialbu\n")
     assert "description:" in skill.split("---", 2)[1]
     assert "TODO" not in skill
+    assert (ROOT / "GEMINI.md").is_file()
 
 
 def validate_live_endpoint() -> None:

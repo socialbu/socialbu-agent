@@ -44,8 +44,8 @@ After saving the configuration, start the client's MCP sign-in or reconnect flow
 
 Until SocialBu is available in the ChatGPT app directory, add it as a custom MCP app:
 
-1. Open **Settings → Apps → Advanced settings** and enable developer mode.
-2. Select **Create app**.
+1. Open **Settings → Security and login** and enable developer mode.
+2. Open **ChatGPT Plugins**, select the plus button, and create a plugin with MCP.
 3. Enter `SocialBu` and `https://socialbu.com/mcp`.
 4. Complete the SocialBu authorization flow.
 
@@ -53,7 +53,12 @@ The exact menu labels can vary by ChatGPT plan and workspace policy. Workspace a
 
 ### Codex
 
-Install this repository as an Agent Plugin when it is listed in the plugin directory. For a direct connection, add the `socialbu` entry from [`.mcp.json`](../.mcp.json) to your Codex MCP configuration, then sign in when Codex asks to authenticate.
+Install this repository as an Agent Plugin when it is listed in the plugin directory. For a direct connection, use the Codex CLI:
+
+```bash
+codex mcp add socialbu --url https://socialbu.com/mcp --oauth-resource https://socialbu.com/mcp
+codex mcp login socialbu
+```
 
 The included [`skills/socialbu`](../skills/socialbu) instructions teach Codex how to select tools and handle publishing and destructive actions safely.
 
@@ -129,11 +134,11 @@ Open that file and select **Start** or **Auth** above the server entry to comple
 
 ### Windsurf
 
-Open **Windsurf Settings → Cascade → MCP Servers**, add a remote HTTP server named `socialbu`, and use `https://socialbu.com/mcp`. If your Windsurf version cannot complete OAuth for a remote MCP server, update the client before connecting.
+Open **Windsurf Settings → Cascade → MCP Servers**, add a remote HTTP server named `socialbu`, and use `https://socialbu.com/mcp`. Connect only if the installed Windsurf version offers OAuth for remote MCP servers. Do not substitute a copied access token.
 
 ### Cline and Roo Code
 
-Open the MCP Servers panel, choose remote Streamable HTTP, and add `https://socialbu.com/mcp` as `socialbu`. Complete the browser authorization when the extension prompts you.
+Remote OAuth support varies by version. If the MCP Servers panel offers remote Streamable HTTP with OAuth, add `https://socialbu.com/mcp` as `socialbu` and complete browser authorization. If it accepts only a local command or pasted credentials, this SocialBu connection is not supported safely by that version.
 
 ### Zed
 
@@ -141,18 +146,10 @@ Add SocialBu as a remote MCP server from the Agent Panel settings. Use `https://
 
 ### OpenCode
 
-Add a remote MCP entry to `opencode.json`:
+Add the remote server:
 
-```json
-{
-  "mcp": {
-    "socialbu": {
-      "type": "remote",
-      "url": "https://socialbu.com/mcp",
-      "enabled": true
-    }
-  }
-}
+```bash
+opencode mcp add socialbu --url https://socialbu.com/mcp
 ```
 
 Run `opencode mcp auth socialbu` to authorize the connection.
@@ -179,3 +176,5 @@ DeepSeek is a model provider rather than one install target. Any DeepSeek-powere
 - **A client supports only local stdio servers:** use a maintained MCP remote-to-stdio bridge that supports OAuth, or use the [SocialBu CLI](https://github.com/socialbu/socialbu-cli). Do not place session tokens in configuration files.
 
 For product setup help, see the [SocialBu MCP page](https://socialbu.com/mcp-server). Packaging issues belong in this repository's [issue tracker](https://github.com/socialbu/socialbu-agent/issues).
+
+Client interfaces change frequently. The setup above follows the current official documentation for [OpenAI plugins](https://developers.openai.com/plugins/deploy/connect-chatgpt), [Cursor MCP](https://docs.cursor.com/context/model-context-protocol), [Claude MCP](https://docs.claude.com/en/docs/mcp), [Gemini CLI extensions](https://geminicli.com/docs/extensions/reference/), [GitHub Copilot MCP](https://docs.github.com/en/copilot/how-tos/provide-context/use-mcp-in-your-ide/extend-copilot-chat-with-mcp), [Zed MCP](https://zed.dev/docs/ai/mcp), and [OpenCode MCP](https://opencode.ai/v2/docs/mcp-servers).
