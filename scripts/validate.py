@@ -80,6 +80,7 @@ def validate_files() -> None:
     assert "description:" in skill.split("---", 2)[1]
     assert "TODO" not in skill
     assert (ROOT / "GEMINI.md").is_file()
+    assert (ROOT / "docs/publishing.md").is_file()
 
 
 def validate_live_endpoint() -> None:

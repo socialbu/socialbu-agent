@@ -45,6 +45,18 @@ Restart Gemini CLI after installation, then authorize SocialBu when prompted.
 /plugin install socialbu@socialbu-agent
 ```
 
+### GitHub Copilot CLI
+
+```bash
+copilot plugin install socialbu/socialbu-agent
+```
+
+### Qwen Code
+
+```bash
+qwen extensions install socialbu/socialbu-agent
+```
+
 ### Other clients
 
 See [client setup instructions](docs/clients.md) for ChatGPT, Codex, Cursor, GitHub Copilot, Windsurf, Cline, Zed, OpenCode, Grok Build, Qwen Code, and direct MCP configuration.
@@ -83,6 +95,8 @@ SocialBu's inbox is not currently exposed by this MCP server. Available operatio
 | `gemini-extension.json` | Gemini CLI extension manifest |
 | `GEMINI.md` | Gemini CLI operating guidance |
 | `server.json` | Official MCP Registry metadata |
+
+Maintainers can use the [release and directory checklist](docs/publishing.md) for versioning, validation, and submission requirements.
 
 ## Existing SocialBu CLI
 

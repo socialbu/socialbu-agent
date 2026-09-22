@@ -111,7 +111,13 @@ Restart Gemini CLI after installation. It reads `gemini-extension.json` and disc
 
 ### GitHub Copilot
 
-Copilot CLI can connect directly:
+Install the complete Agent Plugin in Copilot CLI:
+
+```bash
+copilot plugin install socialbu/socialbu-agent
+```
+
+For an MCP-only connection:
 
 ```bash
 copilot mcp add --transport http socialbu https://socialbu.com/mcp
@@ -158,7 +164,15 @@ Run `opencode mcp auth socialbu` to authorize the connection.
 
 Install SocialBu from the Grok plugin marketplace when its listing is available. The repository also contains [Grok plugin metadata](../.grok-plugin/plugin.json) for direct or organization-managed installation.
 
-### Qwen Code and other MCP clients
+### Qwen Code
+
+Qwen Code loads this repository as a portable Agent Plugin:
+
+```bash
+qwen extensions install socialbu/socialbu-agent
+```
+
+### Other MCP clients
 
 Use the portable `mcpServers` configuration at the top of this page. The client must support all three of these features:
 
