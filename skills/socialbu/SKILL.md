@@ -1,6 +1,6 @@
 ---
 name: socialbu
-description: Use SocialBu through its MCP server when the user wants to inspect connected social accounts, create or schedule posts, manage queues, analyze performance, work with automations, browse curated content, or manage social listening items. Do not use it for unrelated public social data or inbox tasks that the current MCP tool set does not expose.
+description: Use SocialBu through its MCP server when the user wants to inspect connected social accounts, create or schedule posts, manage queues, analyze performance, work with automations, browse curated content, or manage social listening items. Do not use it for unrelated public social data.
 ---
 
 # SocialBu
@@ -30,5 +30,3 @@ Use the SocialBu MCP tools as the source of truth for the authenticated workspac
 - Verify the destination account, content, media, scheduled time, and requested post state before a consequential action.
 - Return the actual SocialBu result. Never invent a post, account, metric, publish result, or successful mutation.
 - Explain actionable API or permission errors without exposing tokens, signed upload URLs after use, or private account data unrelated to the request.
-
-The current SocialBu MCP server does not expose the social inbox. Do not imply that inbox messages or replies were read or changed through these tools.

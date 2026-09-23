@@ -72,7 +72,7 @@ See [client setup instructions](docs/clients.md) for ChatGPT, Codex, Cursor, Git
 - Read, archive, restore, and delete saved Listen items
 - Run SocialBu AI content tools
 
-SocialBu's inbox is not currently exposed by this MCP server. Available operations depend on the user's plan, permissions, teams, connected networks, and account types.
+Available operations depend on the user's plan, permissions, teams, connected networks, and account types.
 
 ## Safety model
 
@@ -95,6 +95,7 @@ SocialBu's inbox is not currently exposed by this MCP server. Available operatio
 | `gemini-extension.json` | Gemini CLI extension manifest |
 | `GEMINI.md` | Gemini CLI operating guidance |
 | `server.json` | Official MCP Registry metadata |
+| `LICENSE` | MIT license |
 
 Maintainers can use the [release and directory checklist](docs/publishing.md) for versioning, validation, and submission requirements.
 

@@ -81,6 +81,7 @@ def validate_files() -> None:
     assert "TODO" not in skill
     assert (ROOT / "GEMINI.md").is_file()
     assert (ROOT / "docs/publishing.md").is_file()
+    assert (ROOT / "LICENSE").read_text(encoding="utf-8").startswith("MIT License\n")
 
 
 def validate_live_endpoint() -> None:

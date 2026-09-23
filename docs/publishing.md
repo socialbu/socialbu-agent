@@ -4,7 +4,7 @@ This repository is the public release artifact for the SocialBu Agent Plugin. Th
 
 ## Before the first release
 
-- Add the license selected by SocialBu. Some directories will not accept an unlicensed package.
+- Confirm the repository includes the MIT license.
 - Keep `1.0.0` synchronized in `plugin.json`, `server.json`, `gemini-extension.json`, `.codex-plugin/plugin.json`, `.claude-plugin/plugin.json`, and `.grok-plugin/plugin.json`.
 - Confirm the privacy policy, terms, support address, repository, homepage, logo, and icon are public and current.
 - Confirm OAuth discovery, dynamic client registration, PKCE, and the protected MCP resource are live. Do not add OAuth scopes unless the server starts enforcing them.
@@ -33,7 +33,7 @@ CI also validates the portable Agent Plugins manifests and `server.json` against
 | Claude plugin directory | Submit the public repository through the plugin directory form linked from [Anthropic's marketplace](https://github.com/anthropics/claude-plugins-official). | `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `.mcp.json`, the skill, and the entire shipped repository are reviewed. |
 | xAI Grok Build marketplace | Open a PR against [xai-org/plugin-marketplace](https://github.com/xai-org/plugin-marketplace). | Use a remote source pinned to the full lowercase SHA of the released commit. The plugin must state its license. |
 | GitHub Copilot | The public repository is directly installable. For default-marketplace discovery, follow the external-plugin contribution process in [github/awesome-copilot](https://github.com/github/awesome-copilot). | Copilot supports the portable root manifests and also recognizes `.claude-plugin/marketplace.json`. Pin the public release commit when the directory asks for an immutable ref. |
-| Agent Skills ecosystem | Public GitHub discovery through `npx skills add socialbu/socialbu-agent`. | Keep `skills/socialbu/SKILL.md` valid and free of product behavior that the live MCP server does not expose. |
+| Agent Skills ecosystem | Public GitHub discovery through `npx skills add socialbu/socialbu-agent`. | Keep `skills/socialbu/SKILL.md` valid and aligned with the hosted MCP tools. |
 
 Qwen Code can install the repository directly because it supports Agent Plugins v1. Other clients documented in [clients.md](clients.md) connect to the same remote MCP endpoint and do not currently require a separate package submission.
 
