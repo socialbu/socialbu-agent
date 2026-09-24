@@ -1,0 +1,124 @@
+name: Release agent package
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing v-prefixed release tag to validate or publish
+        type: string
+        required: true
+      publish_registry:
+        description: Publish this version to the Official MCP Registry
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    uses: ./.github/workflows/validate.yml
+    with:
+      ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
+      release_tag: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+      live: true
+
+  release:
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    env:
+      RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+      MCP_PUBLISHER_VERSION: "1.8.1"
+      MCP_PUBLISHER_SHA256: "a06c9096dcb9727c13555b6be26c7effa707b01f06a4c561ba7a3635443cf2cc"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.RELEASE_TAG }}
+
+      - name: Read release metadata
+        shell: bash
+        run: |
+          echo "VERSION=${RELEASE_TAG#v}" >> "$GITHUB_ENV"
+          echo "RELEASE_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      - name: Create GitHub Release
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            echo "GitHub Release $RELEASE_TAG already exists."
+          else
+            gh release create "$RELEASE_TAG" --verify-tag --generate-notes --title "SocialBu Agent Plugin $RELEASE_TAG"
+          fi
+
+      - name: Install MCP Registry publisher
+        if: github.event_name == 'push' || inputs.publish_registry == true
+        run: |
+          curl -fsSLo mcp-publisher.tar.gz "https://github.com/modelcontextprotocol/registry/releases/download/v${MCP_PUBLISHER_VERSION}/mcp-publisher_linux_amd64.tar.gz"
+          echo "${MCP_PUBLISHER_SHA256}  mcp-publisher.tar.gz" | sha256sum -c -
+          tar -xzf mcp-publisher.tar.gz mcp-publisher
+
+      - name: Check whether this Registry version already exists
+        if: github.event_name == 'push' || inputs.publish_registry == true
+        shell: bash
+        run: |
+          status=$(curl --silent --show-error --retry 3 --retry-all-errors --connect-timeout 10 --max-time 30 \
+            --output registry-versions.json --write-out "%{http_code}" \
+            "https://registry.modelcontextprotocol.io/v0.1/servers/io.github.socialbu%2Fsocialbu/versions")
+
+          if [[ "$status" == "200" ]] && jq -e --arg version "$VERSION" \
+            '[.versions[]? | if type == "string" then . else (.version // .server.version // empty) end] | index($version) != null' \
+            registry-versions.json >/dev/null; then
+            echo "REGISTRY_VERSION_EXISTS=true" >> "$GITHUB_ENV"
+          elif [[ "$status" != "200" && "$status" != "404" ]]; then
+            cat registry-versions.json
+            exit 1
+          fi
+
+      - name: Authenticate to the Official MCP Registry
+        if: (github.event_name == 'push' || inputs.publish_registry == true) && env.REGISTRY_VERSION_EXISTS != 'true'
+        run: ./mcp-publisher login github-oidc
+
+      - name: Publish to the Official MCP Registry
+        if: (github.event_name == 'push' || inputs.publish_registry == true) && env.REGISTRY_VERSION_EXISTS != 'true'
+        run: ./mcp-publisher publish
+
+      - name: Verify Registry publication
+        if: github.event_name == 'push' || inputs.publish_registry == true
+        shell: bash
+        run: |
+          for attempt in {1..10}; do
+            if curl --silent --show-error --retry 2 --retry-all-errors --connect-timeout 10 --max-time 30 \
+              "https://registry.modelcontextprotocol.io/v0.1/servers/io.github.socialbu%2Fsocialbu/versions" \
+              | jq -e --arg version "$VERSION" \
+                '[.versions[]? | if type == "string" then . else (.version // .server.version // empty) end] | index($version) != null' \
+                >/dev/null; then
+              exit 0
+            fi
+            sleep 3
+          done
+          echo "Registry version $VERSION was not visible after publication."
+          exit 1
+
+      - name: Summarize release and submissions
+        if: always()
+        run: |
+          {
+            echo "## SocialBu Agent Plugin $RELEASE_TAG"
+            echo "- Commit: \`$RELEASE_SHA\`"
+            echo "- GitHub Release: automatic for new tags"
+            echo "- Gemini CLI gallery: automatic discovery from the tag"
+            echo "- Official MCP Registry: automatic when publishing is enabled"
+            echo "- OpenAI, Claude, Cursor, xAI, and GitHub Copilot directories: manual review remains required"
+          } >> "$GITHUB_STEP_SUMMARY"

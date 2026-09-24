@@ -48,7 +48,8 @@ Restart Gemini CLI after installation, then authorize SocialBu when prompted.
 ### GitHub Copilot CLI
 
 ```bash
-copilot plugin install socialbu/socialbu-agent
+copilot plugin marketplace add socialbu/socialbu-agent
+copilot plugin install socialbu@socialbu-agent
 ```
 
 ### Qwen Code
@@ -73,31 +74,6 @@ See [client setup instructions](docs/clients.md) for ChatGPT, Codex, Cursor, Git
 - Run SocialBu AI content tools
 
 Available operations depend on the user's plan, permissions, teams, connected networks, and account types.
-
-## Safety model
-
-- Read operations are marked read-only.
-- Publishing, deletion, account removal, approvals, automation changes, and other consequential actions are marked accurately in MCP tool annotations.
-- OAuth access is granted by the SocialBu user in the browser.
-- MCP credentials are bound to `https://socialbu.com/mcp` and are separate from REST API credentials.
-- No credentials belong in this repository, prompts, logs, issues, or screenshots.
-
-## Repository contents
-
-| Path | Purpose |
-| --- | --- |
-| `plugin.json` | Portable Agent Plugins manifest |
-| `mcp.json` | Portable remote MCP definition |
-| `skills/socialbu/` | Reusable SocialBu operating guidance |
-| `.claude-plugin/` | Claude plugin and marketplace metadata |
-| `.codex-plugin/` | Codex compatibility manifest |
-| `.grok-plugin/` | Grok Build compatibility metadata |
-| `gemini-extension.json` | Gemini CLI extension manifest |
-| `GEMINI.md` | Gemini CLI operating guidance |
-| `server.json` | Official MCP Registry metadata |
-| `LICENSE` | MIT license |
-
-Maintainers can use the [release and directory checklist](docs/publishing.md) for versioning, validation, and submission requirements.
 
 ## Existing SocialBu CLI
 
