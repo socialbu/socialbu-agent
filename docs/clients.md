@@ -6,6 +6,8 @@ SocialBu uses one hosted Streamable HTTP MCP server:
 https://socialbu.com/mcp
 ```
 
+Claude Code, Claude.ai, and Claude Desktop use `https://socialbu.com/mcp/claude`. Follow the Claude setup instructions below for those clients.
+
 There is no server to run and no API key to copy. A compatible client opens SocialBu in your browser so you can sign in and authorize the connection.
 
 ## Portable configuration

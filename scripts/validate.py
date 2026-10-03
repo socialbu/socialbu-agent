@@ -104,20 +104,24 @@ def validate_files(release_tag: str = "") -> None:
 
 
 def validate_live_endpoint() -> None:
-    request = urllib.request.Request(MCP_URL, method="GET")
-    try:
-        urllib.request.urlopen(request, timeout=15)
-    except urllib.error.HTTPError as error:
-        assert error.code in {401, 403, 405}, f"Unexpected MCP status: {error.code}"
-    except urllib.error.URLError as error:
-        raise AssertionError(f"Could not reach {MCP_URL}: {error.reason}") from error
-    else:
-        raise AssertionError("The MCP endpoint unexpectedly allowed an unauthenticated GET")
+    claude_url = load_json(".claude-plugin/plugin.json")["mcpServers"]["socialbu"]["url"]
+    for url in (MCP_URL, claude_url):
+        request = urllib.request.Request(url, method="GET")
+        try:
+            urllib.request.urlopen(request, timeout=15)
+        except urllib.error.HTTPError as error:
+            assert error.code in {401, 403, 405}, f"Unexpected MCP status for {url}: {error.code}"
+            if url == claude_url:
+                assert error.code == 401 and '/.well-known/oauth-protected-resource/mcp/claude"' in error.headers.get("WWW-Authenticate", ""), f"Missing Claude OAuth challenge at {url}"
+        except urllib.error.URLError as error:
+            raise AssertionError(f"Could not reach {url}: {error.reason}") from error
+        else:
+            raise AssertionError(f"{url} unexpectedly allowed an unauthenticated GET")
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--live", action="store_true", help="also check the hosted endpoint")
+    parser.add_argument("--live", action="store_true", help="also check both hosted endpoints")
     parser.add_argument("--release-tag", default="", help="require manifests to match this v-prefixed tag")
     args = parser.parse_args()
 

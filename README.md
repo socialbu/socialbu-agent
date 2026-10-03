@@ -10,11 +10,13 @@ The hosted MCP server is the source of truth. This repository contains portable 
 
 ## Connect
 
-Use this remote MCP server in any client that supports Streamable HTTP and OAuth:
+For clients other than Claude, use this remote MCP server with Streamable HTTP and OAuth:
 
 ```text
 https://socialbu.com/mcp
 ```
+
+For Claude Code, Claude.ai, and Claude Desktop, use `https://socialbu.com/mcp/claude`.
 
 Your client opens SocialBu in a browser. Sign in and approve the connection there. Do not paste a SocialBu password or API token into a prompt.
 
