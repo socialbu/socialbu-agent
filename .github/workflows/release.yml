@@ -26,13 +26,15 @@ jobs:
   validate:
     uses: ./.github/workflows/validate.yml
     with:
-      ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
+      ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/{0}', inputs.tag) || github.ref }}
       release_tag: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
       live: true
 
   release:
     needs: validate
+    if: github.event_name == 'push' || inputs.publish_registry == true
     runs-on: ubuntu-latest
+    environment: mcp-registry-publish
     permissions:
       contents: write
       id-token: write
@@ -43,34 +45,32 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ env.RELEASE_TAG }}
+          ref: refs/tags/${{ env.RELEASE_TAG }}
 
       - name: Read release metadata
         shell: bash
         run: |
+          test "$(git rev-parse HEAD)" = "$(git rev-parse --verify "refs/tags/$RELEASE_TAG^{commit}")"
           echo "VERSION=${RELEASE_TAG#v}" >> "$GITHUB_ENV"
           echo "RELEASE_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
-      - name: Create GitHub Release
-        if: github.event_name == 'push'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
-            echo "GitHub Release $RELEASE_TAG already exists."
-          else
-            gh release create "$RELEASE_TAG" --verify-tag --generate-notes --title "SocialBu Agent Plugin $RELEASE_TAG"
-          fi
-
-      - name: Attach plugin ZIP
+      - name: Create GitHub Release with plugin ZIP
         if: github.event_name == 'push'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           archive="socialbu-agent-${RELEASE_TAG}.zip"
-          if ! gh release view "$RELEASE_TAG" --json assets --jq '.assets[].name' | grep -Fxq "$archive"; then
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            if ! gh release view "$RELEASE_TAG" --json assets --jq '.assets[].name' | grep -Fxq "$archive"; then
+              git archive --format=zip --output="$archive" HEAD
+              gh release upload "$RELEASE_TAG" "$archive"
+            fi
+            if [[ "$(gh release view "$RELEASE_TAG" --json isDraft --jq '.isDraft')" == "true" ]]; then
+              gh release edit "$RELEASE_TAG" --draft=false
+            fi
+          else
             git archive --format=zip --output="$archive" HEAD
-            gh release upload "$RELEASE_TAG" "$archive"
+            gh release create "$RELEASE_TAG" "$archive" --verify-tag --generate-notes --title "SocialBu Agent Plugin $RELEASE_TAG"
           fi
 
       - name: Install MCP Registry publisher
@@ -88,11 +88,13 @@ jobs:
             --output registry-version.json --write-out "%{http_code}" \
             "https://registry.modelcontextprotocol.io/v0.1/servers/io.github.socialbu%2Fsocialbu/versions/$VERSION")
 
-          if [[ "$status" == "200" ]] && jq -e --arg version "$VERSION" \
-            '.server.version == $version' \
-            registry-version.json >/dev/null; then
+          if [[ "$status" == "200" ]]; then
+            if ! jq -e --slurpfile expected server.json '.server == $expected[0]' registry-version.json >/dev/null; then
+              echo "Existing Registry metadata does not match server.json. Publish a new version instead."
+              exit 1
+            fi
             echo "REGISTRY_VERSION_EXISTS=true" >> "$GITHUB_ENV"
-          elif [[ "$status" != "200" && "$status" != "404" ]]; then
+          elif [[ "$status" != "404" ]]; then
             cat registry-version.json
             exit 1
           fi
@@ -112,8 +114,8 @@ jobs:
           for attempt in {1..10}; do
             if curl --silent --show-error --retry 2 --retry-all-errors --connect-timeout 10 --max-time 30 \
               "https://registry.modelcontextprotocol.io/v0.1/servers/io.github.socialbu%2Fsocialbu/versions/$VERSION" \
-              | jq -e --arg version "$VERSION" \
-                '.server.version == $version and ._meta["io.modelcontextprotocol.registry/official"].status == "active"' \
+              | jq -e --slurpfile expected server.json \
+                '.server == $expected[0] and ._meta["io.modelcontextprotocol.registry/official"].status == "active"' \
                 >/dev/null; then
               exit 0
             fi

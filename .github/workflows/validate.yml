@@ -42,12 +42,16 @@ jobs:
           if [[ "$VALIDATE_LIVE" == "true" ]]; then args+=(--live); fi
           python scripts/validate.py "${args[@]}"
           if [[ -n "$RELEASE_TAG" ]]; then
+            test "$(git rev-parse HEAD)" = "$(git rev-parse --verify "refs/tags/$RELEASE_TAG^{commit}")"
             version=$(python -c 'import json; print(json.load(open("plugin.json"))["version"])')
             if [[ "$RELEASE_TAG" != "v$version" ]]; then
               echo "Release tag $RELEASE_TAG does not match manifest version $version."
               exit 1
             fi
           fi
+      - name: Check release guards when present in the tag
+        run: |
+          if [[ -f scripts/test_release.py ]]; then python scripts/test_release.py; fi
       - run: pip install check-jsonschema==0.38.0
       - run: check-jsonschema --schemafile https://agent-plugins.org/schemas/1.0.0/plugin.schema.json plugin.json
       - run: check-jsonschema --schemafile https://agent-plugins.org/schemas/1.0.0/mcp.schema.json mcp.json

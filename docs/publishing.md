@@ -4,7 +4,7 @@
 
 Pushing a `v*` tag runs `.github/workflows/release.yml`. The workflow validates the exact tagged commit, checks the live MCP endpoint, creates the GitHub Release with a plugin ZIP, publishes `server.json` to the Official MCP Registry with GitHub OIDC, verifies the published version, and leaves a submission summary in the workflow run.
 
-No repository secret is required for the MCP Registry. The workflow pins and verifies the `mcp-publisher` binary before using it.
+No repository secret is required for the MCP Registry. The workflow pins and verifies the `mcp-publisher` binary before using it. The release job uses the protected `mcp-registry-publish` environment, restricted to `main` and `v*` tags, and waits for publisher approval before obtaining its Registry credential.
 
 Gemini CLI discovers tagged public repositories with the `gemini-cli-extension` topic automatically. The repository already has the topic and root `gemini-extension.json`, so no separate Gemini submission runs in CI.
 
@@ -27,7 +27,7 @@ For an existing tag, use **Actions → Release agent package → Run workflow**.
 
 `io.github.socialbu/socialbu` version `1.0.0` was published on October 3, 2026. The older `io.github.usamaejaz/socialbu-mcp` listing is hidden from discovery with a migration message; its historical metadata remains available. Both records point to `https://socialbu.com/mcp`.
 
-The migration is complete. Future `v*` tags publish new versions under the SocialBu organization identity. Rerunning publication for `v1.0.0` skips the existing Registry version.
+The migration is complete. Future `v*` tags publish new versions under the SocialBu organization identity. Rerunning publication skips an existing Registry version only when its complete server metadata matches the tagged `server.json` and its status is active.
 
 ## Reviewed directories
 

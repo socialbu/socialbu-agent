@@ -8,6 +8,7 @@
     "url": "https://socialbu.com"
   },
   "homepage": "https://socialbu.com/mcp-server",
+  "privacyPolicyUrl": "https://socialbu.com/about/privacy",
   "repository": "https://github.com/socialbu/socialbu-agent",
   "skills": ["./skills/socialbu"],
   "keywords": ["socialbu", "social-media", "scheduling", "analytics", "automation", "mcp"]
