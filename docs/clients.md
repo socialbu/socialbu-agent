@@ -114,7 +114,8 @@ Restart Gemini CLI after installation. It reads `gemini-extension.json` and disc
 Install the complete Agent Plugin in Copilot CLI:
 
 ```bash
-copilot plugin install socialbu/socialbu-agent
+copilot plugin marketplace add socialbu/socialbu-agent
+copilot plugin install socialbu@socialbu-agent
 ```
 
 For an MCP-only connection:

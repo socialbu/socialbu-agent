@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "socialbu",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Manage authorized SocialBu posts, accounts, queues, analytics, automations, curated content, media, and social listening through AI agents.",
   "author": {
     "name": "SocialBu",
@@ -15,12 +15,13 @@
     "com.openai": {
       "interface": {
         "displayName": "SocialBu",
-        "shortDescription": "Manage social media through SocialBu",
+        "shortDescription": "Manage your social media",
         "longDescription": "Create and schedule posts, inspect connected accounts, work with queues, review analytics, manage automations, browse curated content, and handle social listening items in an authorized SocialBu workspace.",
         "developerName": "SocialBu",
         "category": "Productivity",
         "capabilities": ["Read", "Write"],
         "websiteURL": "https://socialbu.com/mcp-server",
+        "supportURL": "https://socialbu.com/contact",
         "privacyPolicyURL": "https://socialbu.com/about/privacy",
         "termsOfServiceURL": "https://socialbu.com/about/terms",
         "defaultPrompt": [

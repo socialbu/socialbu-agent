@@ -13,7 +13,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 MCP_URL = "https://socialbu.com/mcp"
-VERSION = "1.0.0"
 
 
 def load_json(path: str) -> dict:
@@ -21,7 +20,7 @@ def load_json(path: str) -> dict:
         return json.load(handle)
 
 
-def validate_files() -> None:
+def validate_files(release_tag: str = "") -> None:
     manifests = {
         path: load_json(path)
         for path in (
@@ -38,6 +37,7 @@ def validate_files() -> None:
         )
     }
 
+    version = manifests["plugin.json"]["version"]
     for path in (
         "plugin.json",
         "server.json",
@@ -46,7 +46,11 @@ def validate_files() -> None:
         ".claude-plugin/plugin.json",
         ".grok-plugin/plugin.json",
     ):
-        assert manifests[path]["version"] == VERSION, f"Version mismatch in {path}"
+        assert manifests[path]["version"] == version, f"Version mismatch in {path}"
+
+    assert manifests[".claude-plugin/marketplace.json"]["metadata"]["version"] == version
+    if release_tag:
+        assert release_tag == f"v{version}", "Release tag must match manifest versions"
 
     for path in (
         "plugin.json",
@@ -72,6 +76,17 @@ def validate_files() -> None:
 
     plugin = manifests["plugin.json"]
     interface = plugin["extensions"]["com.openai"]["interface"]
+    for field in ("displayName", "shortDescription"):
+        assert 0 < len(interface[field]) <= 30, f"Invalid OpenAI listing length: {field}"
+    for field in ("websiteURL", "supportURL", "privacyPolicyURL", "termsOfServiceURL"):
+        assert interface[field].startswith("https://"), f"Missing HTTPS listing URL: {field}"
+    for claude_field, openai_field in (
+        ("documentationUrl", "websiteURL"),
+        ("supportUrl", "supportURL"),
+        ("privacyPolicyUrl", "privacyPolicyURL"),
+        ("termsOfServiceUrl", "termsOfServiceURL"),
+    ):
+        assert manifests[".claude-plugin/plugin.json"][claude_field] == interface[openai_field]
     for asset in (interface["composerIcon"], interface["logo"]):
         assert (ROOT / asset).is_file(), f"Missing asset: {asset}"
 
@@ -99,10 +114,11 @@ def validate_live_endpoint() -> None:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--live", action="store_true", help="also check the hosted endpoint")
+    parser.add_argument("--release-tag", default="", help="require manifests to match this v-prefixed tag")
     args = parser.parse_args()
 
     try:
-        validate_files()
+        validate_files(args.release_tag)
         if args.live:
             validate_live_endpoint()
     except (AssertionError, KeyError, json.JSONDecodeError) as error:
