@@ -74,15 +74,15 @@ jobs:
         shell: bash
         run: |
           status=$(curl --silent --show-error --retry 3 --retry-all-errors --connect-timeout 10 --max-time 30 \
-            --output registry-versions.json --write-out "%{http_code}" \
-            "https://registry.modelcontextprotocol.io/v0.1/servers/io.github.socialbu%2Fsocialbu/versions")
+            --output registry-version.json --write-out "%{http_code}" \
+            "https://registry.modelcontextprotocol.io/v0.1/servers/io.github.socialbu%2Fsocialbu/versions/$VERSION")
 
           if [[ "$status" == "200" ]] && jq -e --arg version "$VERSION" \
-            '[.versions[]? | if type == "string" then . else (.version // .server.version // empty) end] | index($version) != null' \
-            registry-versions.json >/dev/null; then
+            '.server.version == $version' \
+            registry-version.json >/dev/null; then
             echo "REGISTRY_VERSION_EXISTS=true" >> "$GITHUB_ENV"
           elif [[ "$status" != "200" && "$status" != "404" ]]; then
-            cat registry-versions.json
+            cat registry-version.json
             exit 1
           fi
 
@@ -100,9 +100,9 @@ jobs:
         run: |
           for attempt in {1..10}; do
             if curl --silent --show-error --retry 2 --retry-all-errors --connect-timeout 10 --max-time 30 \
-              "https://registry.modelcontextprotocol.io/v0.1/servers/io.github.socialbu%2Fsocialbu/versions" \
+              "https://registry.modelcontextprotocol.io/v0.1/servers/io.github.socialbu%2Fsocialbu/versions/$VERSION" \
               | jq -e --arg version "$VERSION" \
-                '[.versions[]? | if type == "string" then . else (.version // .server.version // empty) end] | index($version) != null' \
+                '.server.version == $version and ._meta["io.modelcontextprotocol.registry/official"].status == "active"' \
                 >/dev/null; then
               exit 0
             fi

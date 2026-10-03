@@ -23,16 +23,11 @@ git push origin v1.1.0
 
 For an existing tag, use **Actions → Release agent package → Run workflow**. Leave Registry publishing off for a validation-only run.
 
-## One-time Registry migration
+## Registry identity
 
-The Registry currently has the older `io.github.usamaejaz/socialbu-mcp` identity for the same remote endpoint. Delete all versions of that entry before the first automated publication of `io.github.socialbu/socialbu`; otherwise remote URL uniqueness can reject the new identity.
+`io.github.socialbu/socialbu` version `1.0.0` was published on October 3, 2026. The older `io.github.usamaejaz/socialbu-mcp` listing is hidden from discovery with a migration message; its historical metadata remains available. Both records point to `https://socialbu.com/mcp`.
 
-```bash
-mcp-publisher login github
-mcp-publisher status --status deleted --all-versions --yes --message "Moved to io.github.socialbu/socialbu" io.github.usamaejaz/socialbu-mcp
-```
-
-After the old listing is hidden, manually run the release workflow for `v1.0.0` with Registry publishing enabled. Future `v*` tags publish automatically.
+The migration is complete. Future `v*` tags publish new versions under the SocialBu organization identity. Rerunning publication for `v1.0.0` skips the existing Registry version.
 
 ## Reviewed directories
 
