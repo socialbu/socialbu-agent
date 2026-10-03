@@ -1,6 +1,6 @@
 {
   "name": "socialbu",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Manage authorized SocialBu posts, accounts, queues, analytics, automations, curated content, media, and social listening.",
   "author": {
     "name": "SocialBu",
@@ -13,6 +13,12 @@
   "privacyPolicyUrl": "https://socialbu.com/about/privacy",
   "termsOfServiceUrl": "https://socialbu.com/about/terms",
   "repository": "https://github.com/socialbu/socialbu-agent",
+  "mcpServers": {
+    "socialbu": {
+      "type": "http",
+      "url": "https://socialbu.com/mcp/claude"
+    }
+  },
   "skills": ["./skills/socialbu"],
   "keywords": ["socialbu", "social-media", "scheduling", "analytics", "automation", "mcp"]
 }

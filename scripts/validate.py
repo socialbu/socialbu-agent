@@ -68,6 +68,10 @@ def validate_files(release_tag: str = "") -> None:
     assert manifests["gemini-extension.json"]["contextFileName"] == "GEMINI.md"
     assert manifests["mcp.json"]["mcpServers"]["socialbu"]["url"] == MCP_URL
     assert manifests[".mcp.json"]["mcpServers"]["socialbu"]["url"] == MCP_URL
+    assert manifests[".codex-plugin/plugin.json"]["mcpServers"] == "./.mcp.json"
+    assert manifests[".claude-plugin/plugin.json"]["mcpServers"] == {
+        "socialbu": {"type": "http", "url": f"{MCP_URL}/claude"}
+    }
     assert manifests["server.json"]["remotes"] == [
         {"type": "streamable-http", "url": MCP_URL}
     ]

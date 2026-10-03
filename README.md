@@ -45,6 +45,8 @@ Restart Gemini CLI after installation, then authorize SocialBu when prompted.
 /plugin install socialbu@socialbu-agent
 ```
 
+The Claude plugin connects to `https://socialbu.com/mcp/claude`.
+
 ### GitHub Copilot CLI
 
 ```bash
