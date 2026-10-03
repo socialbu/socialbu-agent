@@ -2,7 +2,7 @@
 
 ## Automated release flow
 
-Pushing a `v*` tag runs `.github/workflows/release.yml`. The workflow validates the exact tagged commit, checks the live MCP endpoint, creates the GitHub Release, publishes `server.json` to the Official MCP Registry with GitHub OIDC, verifies the published version, and leaves a submission summary in the workflow run.
+Pushing a `v*` tag runs `.github/workflows/release.yml`. The workflow validates the exact tagged commit, checks the live MCP endpoint, creates the GitHub Release with a plugin ZIP, publishes `server.json` to the Official MCP Registry with GitHub OIDC, verifies the published version, and leaves a submission summary in the workflow run.
 
 No repository secret is required for the MCP Registry. The workflow pins and verifies the `mcp-publisher` binary before using it.
 
@@ -35,10 +35,10 @@ These channels require a form, external pull request, account verification, atte
 
 | Directory | Submission path |
 | --- | --- |
-| OpenAI Plugins Directory | Submit the remote MCP endpoint through the [OpenAI plugin submission portal](https://developers.openai.com/plugins/deploy/submission). |
+| OpenAI Plugins Directory | Upload the release ZIP using **With MCP** in the [OpenAI plugin submission portal](https://platform.openai.com/plugins), then complete domain verification and review details. Hosted MCP servers are scanned daily after publication. |
 | Cursor Marketplace | Submit the public repository at [cursor.com/marketplace/publish](https://cursor.com/marketplace/publish). |
-| Claude plugin directory | Use Anthropic's [plugin directory submission form](https://github.com/anthropics/claude-plugins-official). |
+| Claude directory | Submit the MCP connector and plugin bundle from the same organization in [Anthropic's developer portal](https://claude.ai/directory/manage). After approval, plugin updates are picked up from the tracked repository branch. |
 | xAI Grok Build marketplace | Open a SHA-pinned contribution against [xai-org/plugin-marketplace](https://github.com/xai-org/plugin-marketplace). |
 | GitHub Copilot | Use the external-plugin submission flow in [github/awesome-copilot](https://github.com/github/awesome-copilot). |
 
-Do not commit reviewer credentials. Record submitted versions, commit SHAs, review states, and listing URLs in the private release tracker.
+Keep reviewer credentials in the submission portals, never in the repository or release ZIP.

@@ -62,6 +62,17 @@ jobs:
             gh release create "$RELEASE_TAG" --verify-tag --generate-notes --title "SocialBu Agent Plugin $RELEASE_TAG"
           fi
 
+      - name: Attach plugin ZIP
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          archive="socialbu-agent-${RELEASE_TAG}.zip"
+          if ! gh release view "$RELEASE_TAG" --json assets --jq '.assets[].name' | grep -Fxq "$archive"; then
+            git archive --format=zip --output="$archive" HEAD
+            gh release upload "$RELEASE_TAG" "$archive"
+          fi
+
       - name: Install MCP Registry publisher
         if: github.event_name == 'push' || inputs.publish_registry == true
         run: |
