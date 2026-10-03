@@ -80,6 +80,13 @@ def validate_files(release_tag: str = "") -> None:
         assert 0 < len(interface[field]) <= 30, f"Invalid OpenAI listing length: {field}"
     for field in ("websiteURL", "supportURL", "privacyPolicyURL", "termsOfServiceURL"):
         assert interface[field].startswith("https://"), f"Missing HTTPS listing URL: {field}"
+    for claude_field, openai_field in (
+        ("documentationUrl", "websiteURL"),
+        ("supportUrl", "supportURL"),
+        ("privacyPolicyUrl", "privacyPolicyURL"),
+        ("termsOfServiceUrl", "termsOfServiceURL"),
+    ):
+        assert manifests[".claude-plugin/plugin.json"][claude_field] == interface[openai_field]
     for asset in (interface["composerIcon"], interface["logo"]):
         assert (ROOT / asset).is_file(), f"Missing asset: {asset}"
 

@@ -11,7 +11,7 @@
   "documentationUrl": "https://socialbu.com/mcp-server",
   "supportUrl": "https://socialbu.com/contact",
   "privacyPolicyUrl": "https://socialbu.com/about/privacy",
-  "termsOfServiceUrl": "https://socialbu.com/about/tos",
+  "termsOfServiceUrl": "https://socialbu.com/about/terms",
   "repository": "https://github.com/socialbu/socialbu-agent",
   "skills": ["./skills/socialbu"],
   "keywords": ["socialbu", "social-media", "scheduling", "analytics", "automation", "mcp"]
