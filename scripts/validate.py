@@ -76,6 +76,10 @@ def validate_files(release_tag: str = "") -> None:
 
     plugin = manifests["plugin.json"]
     interface = plugin["extensions"]["com.openai"]["interface"]
+    for field in ("displayName", "shortDescription"):
+        assert 0 < len(interface[field]) <= 30, f"Invalid OpenAI listing length: {field}"
+    for field in ("websiteURL", "supportURL", "privacyPolicyURL", "termsOfServiceURL"):
+        assert interface[field].startswith("https://"), f"Missing HTTPS listing URL: {field}"
     for asset in (interface["composerIcon"], interface["logo"]):
         assert (ROOT / asset).is_file(), f"Missing asset: {asset}"
 
