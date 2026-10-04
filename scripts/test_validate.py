@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check that releases cannot skip a missing or misconfigured Claude endpoint."""
+"""Check reachability and shared OAuth discovery for both connection URLs."""
 
 import unittest
 import urllib.error
@@ -9,12 +9,13 @@ import validate
 
 
 class LiveEndpointTest(unittest.TestCase):
-    def check_endpoints(self, claude_status=401, claude_metadata="/mcp/claude"):
+    def check_endpoints(self, claude_status=401, claude_metadata=""):
         visited = []
 
         def respond(request, timeout):
+            self.assertEqual("SocialBu-Agent-Validation/1.0", request.get_header("User-agent"))
             visited.append(request.full_url)
-            claude = request.full_url.endswith("/claude")
+            claude = request.full_url == f"{validate.MCP_URL}?client=claude"
             metadata = claude_metadata if claude else ""
             raise urllib.error.HTTPError(
                 request.full_url,
@@ -29,15 +30,15 @@ class LiveEndpointTest(unittest.TestCase):
         return visited
 
     def test_checks_both_endpoints(self):
-        self.assertEqual([validate.MCP_URL, f"{validate.MCP_URL}/claude"], self.check_endpoints())
+        self.assertEqual([validate.MCP_URL, f"{validate.MCP_URL}?client=claude"], self.check_endpoints())
 
     def test_missing_claude_endpoint_blocks_release(self):
         with self.assertRaises(AssertionError):
             self.check_endpoints(claude_status=404)
 
-    def test_generic_oauth_challenge_cannot_stand_in_for_claude(self):
+    def test_claude_connection_requires_the_shared_oauth_challenge(self):
         with self.assertRaises(AssertionError):
-            self.check_endpoints(claude_metadata="")
+            self.check_endpoints(claude_metadata="/mcp/claude")
 
 
 if __name__ == "__main__":

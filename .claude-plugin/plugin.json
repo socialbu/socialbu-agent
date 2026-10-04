@@ -16,7 +16,7 @@
   "mcpServers": {
     "socialbu": {
       "type": "http",
-      "url": "https://socialbu.com/mcp/claude"
+      "url": "https://socialbu.com/mcp?client=claude"
     }
   },
   "skills": ["./skills/socialbu"],

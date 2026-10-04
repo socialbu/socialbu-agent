@@ -6,7 +6,7 @@ SocialBu uses one hosted Streamable HTTP MCP server:
 https://socialbu.com/mcp
 ```
 
-Claude Code, Claude.ai, and Claude Desktop use `https://socialbu.com/mcp/claude`. Follow the Claude setup instructions below for those clients.
+Claude Code, Claude.ai, and Claude Desktop use `https://socialbu.com/mcp?client=claude`. Follow the Claude setup instructions below for those clients.
 
 There is no server to run and no API key to copy. A compatible client opens SocialBu in your browser so you can sign in and authorize the connection.
 
@@ -92,14 +92,14 @@ Install the SocialBu plugin marketplace and plugin:
 For MCP-only installation:
 
 ```bash
-claude mcp add --transport http socialbu https://socialbu.com/mcp/claude
+claude mcp add --transport http socialbu 'https://socialbu.com/mcp?client=claude'
 ```
 
 Run `/mcp` in Claude Code to complete OAuth authorization or inspect connection status.
 
 ### Claude.ai and Claude Desktop
 
-Add `https://socialbu.com/mcp/claude` as a custom connector from the connector settings available to your plan or organization. Organization administrators may need to add and enable it before members can connect their accounts.
+Add `https://socialbu.com/mcp?client=claude` as a custom connector from the connector settings available to your plan or organization. Organization administrators may need to add and enable it before members can connect their accounts.
 
 ### Gemini CLI
 

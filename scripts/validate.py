@@ -70,7 +70,7 @@ def validate_files(release_tag: str = "") -> None:
     assert manifests[".mcp.json"]["mcpServers"]["socialbu"]["url"] == MCP_URL
     assert manifests[".codex-plugin/plugin.json"]["mcpServers"] == "./.mcp.json"
     assert manifests[".claude-plugin/plugin.json"]["mcpServers"] == {
-        "socialbu": {"type": "http", "url": f"{MCP_URL}/claude"}
+        "socialbu": {"type": "http", "url": f"{MCP_URL}?client=claude"}
     }
     assert manifests["server.json"]["remotes"] == [
         {"type": "streamable-http", "url": MCP_URL}
@@ -106,13 +106,13 @@ def validate_files(release_tag: str = "") -> None:
 def validate_live_endpoint() -> None:
     claude_url = load_json(".claude-plugin/plugin.json")["mcpServers"]["socialbu"]["url"]
     for url in (MCP_URL, claude_url):
-        request = urllib.request.Request(url, method="GET")
+        request = urllib.request.Request(url, headers={"User-Agent": "SocialBu-Agent-Validation/1.0"}, method="GET")
         try:
             urllib.request.urlopen(request, timeout=15)
         except urllib.error.HTTPError as error:
             assert error.code in {401, 403, 405}, f"Unexpected MCP status for {url}: {error.code}"
             if url == claude_url:
-                assert error.code == 401 and '/.well-known/oauth-protected-resource/mcp/claude"' in error.headers.get("WWW-Authenticate", ""), f"Missing Claude OAuth challenge at {url}"
+                assert error.code == 401 and '/.well-known/oauth-protected-resource"' in error.headers.get("WWW-Authenticate", ""), f"Missing shared OAuth challenge at {url}"
         except urllib.error.URLError as error:
             raise AssertionError(f"Could not reach {url}: {error.reason}") from error
         else:
@@ -121,7 +121,7 @@ def validate_live_endpoint() -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--live", action="store_true", help="also check both hosted endpoints")
+    parser.add_argument("--live", action="store_true", help="also check both hosted connection URLs")
     parser.add_argument("--release-tag", default="", help="require manifests to match this v-prefixed tag")
     args = parser.parse_args()
 

@@ -16,7 +16,7 @@ For clients other than Claude, use this remote MCP server with Streamable HTTP a
 https://socialbu.com/mcp
 ```
 
-For Claude Code, Claude.ai, and Claude Desktop, use `https://socialbu.com/mcp/claude`.
+For Claude Code, Claude.ai, and Claude Desktop, use `https://socialbu.com/mcp?client=claude`.
 
 Your client opens SocialBu in a browser. Sign in and approve the connection there. Do not paste a SocialBu password or API token into a prompt.
 
@@ -47,7 +47,7 @@ Restart Gemini CLI after installation, then authorize SocialBu when prompted.
 /plugin install socialbu@socialbu-agent
 ```
 
-The Claude plugin connects to `https://socialbu.com/mcp/claude`.
+The Claude plugin connects to `https://socialbu.com/mcp?client=claude`.
 
 ### GitHub Copilot CLI
 
