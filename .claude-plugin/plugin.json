@@ -13,12 +13,7 @@
   "privacyPolicyUrl": "https://socialbu.com/about/privacy",
   "termsOfServiceUrl": "https://socialbu.com/about/terms",
   "repository": "https://github.com/socialbu/socialbu-agent",
-  "mcpServers": {
-    "socialbu": {
-      "type": "http",
-      "url": "https://socialbu.com/mcp?client=claude"
-    }
-  },
+  "mcpServers": "./.mcp.json",
   "skills": ["./skills/socialbu"],
   "keywords": ["socialbu", "social-media", "scheduling", "analytics", "automation", "mcp"]
 }

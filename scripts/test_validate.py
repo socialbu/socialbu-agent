@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check reachability and shared OAuth discovery for both connection URLs."""
+"""Check reachability and shared OAuth discovery for the hosted connection."""
 
 import unittest
 import urllib.error
@@ -9,19 +9,17 @@ import validate
 
 
 class LiveEndpointTest(unittest.TestCase):
-    def check_endpoints(self, claude_status=401, claude_metadata=""):
+    def check_endpoint(self, status=401, metadata="https://socialbu.com/.well-known/oauth-protected-resource"):
         visited = []
 
         def respond(request, timeout):
             self.assertEqual("SocialBu-Agent-Validation/1.0", request.get_header("User-agent"))
             visited.append(request.full_url)
-            claude = request.full_url == f"{validate.MCP_URL}?client=claude"
-            metadata = claude_metadata if claude else ""
             raise urllib.error.HTTPError(
                 request.full_url,
-                claude_status if claude else 401,
+                status,
                 "Unauthorized",
-                {"WWW-Authenticate": f'Bearer resource_metadata="https://socialbu.com/.well-known/oauth-protected-resource{metadata}"'},
+                {"WWW-Authenticate": f'Bearer resource_metadata="{metadata}"'},
                 None,
             )
 
@@ -29,16 +27,16 @@ class LiveEndpointTest(unittest.TestCase):
             validate.validate_live_endpoint()
         return visited
 
-    def test_checks_both_endpoints(self):
-        self.assertEqual([validate.MCP_URL, f"{validate.MCP_URL}?client=claude"], self.check_endpoints())
+    def test_checks_the_shared_endpoint(self):
+        self.assertEqual([validate.MCP_URL], self.check_endpoint())
 
-    def test_missing_claude_endpoint_blocks_release(self):
+    def test_missing_endpoint_blocks_release(self):
         with self.assertRaises(AssertionError):
-            self.check_endpoints(claude_status=404)
+            self.check_endpoint(status=404)
 
-    def test_claude_connection_requires_the_shared_oauth_challenge(self):
+    def test_wrong_discovery_origin_blocks_release(self):
         with self.assertRaises(AssertionError):
-            self.check_endpoints(claude_metadata="/mcp/claude")
+            self.check_endpoint(metadata="https://staging.example/.well-known/oauth-protected-resource")
 
 
 if __name__ == "__main__":
