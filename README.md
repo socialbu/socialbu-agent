@@ -10,7 +10,7 @@ The hosted MCP server is the source of truth. This repository contains portable 
 
 ## Connect
 
-Use this remote MCP server in any client that supports Streamable HTTP and OAuth:
+Use this remote MCP server with Streamable HTTP and OAuth:
 
 ```text
 https://socialbu.com/mcp
@@ -44,6 +44,8 @@ Restart Gemini CLI after installation, then authorize SocialBu when prompted.
 /plugin marketplace add socialbu/socialbu-agent
 /plugin install socialbu@socialbu-agent
 ```
+
+The Claude plugin connects to `https://socialbu.com/mcp`.
 
 ### GitHub Copilot CLI
 

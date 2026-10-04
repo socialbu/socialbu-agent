@@ -14,6 +14,8 @@ Before creating a tag, update the version in every manifest and run:
 python scripts/validate.py --live --release-tag v1.1.0
 ```
 
+Deploy the backend Claude image-tool filter before publishing. Verify `list_ai_tools` and a blocked image call through an authenticated Claude connection, and confirm its stored OAuth client name starts with `Claude`. The unauthenticated live check only verifies reachability and OAuth discovery.
+
 Then push the reviewed tag:
 
 ```bash
@@ -37,7 +39,7 @@ These channels require a form, external pull request, account verification, atte
 | --- | --- |
 | OpenAI Plugins Directory | Upload the release ZIP using **With MCP** in the [OpenAI plugin submission portal](https://platform.openai.com/plugins), then complete domain verification and review details. Hosted MCP servers are scanned daily after publication. |
 | Cursor Marketplace | Submit the public repository at [cursor.com/marketplace/publish](https://cursor.com/marketplace/publish). |
-| Claude directory | Submit the MCP connector and plugin bundle from the same organization in [Anthropic's developer portal](https://claude.ai/directory/manage). After approval, plugin updates are picked up from the tracked repository branch. |
+| Claude directory | Submit the `https://socialbu.com/mcp` connector and plugin bundle from the same organization in [Anthropic's developer portal](https://claude.ai/directory/manage). After approval, plugin updates are picked up from the tracked repository branch. |
 | xAI Grok Build marketplace | Open a SHA-pinned contribution against [xai-org/plugin-marketplace](https://github.com/xai-org/plugin-marketplace). |
 | GitHub Copilot | Use the external-plugin submission flow in [github/awesome-copilot](https://github.com/github/awesome-copilot). |
 

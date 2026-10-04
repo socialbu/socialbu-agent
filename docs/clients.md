@@ -186,7 +186,7 @@ DeepSeek is a model provider rather than one install target. Any DeepSeek-powere
 ## Troubleshooting
 
 - **The client asks for an API key:** choose the OAuth or remote HTTP connection type. SocialBu does not require a pasted key.
-- **Authorization restarts or reports an invalid target:** remove the old connection and add it again using the exact `https://socialbu.com/mcp` URL.
+- **Authorization restarts or reports an invalid target:** remove the old connection and add it again using the exact URL shown for your client above.
 - **Tools are missing:** reconnect, then check your SocialBu plan, team role, and connected accounts. The server returns only the tools and data available to the signed-in user.
 - **A client supports only local stdio servers:** use a maintained MCP remote-to-stdio bridge that supports OAuth, or use the [SocialBu CLI](https://github.com/socialbu/socialbu-cli). Do not place session tokens in configuration files.
 
