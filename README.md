@@ -73,7 +73,6 @@ See [client setup instructions](docs/clients.md) for ChatGPT, Codex, Cursor, Git
 - Inspect and enable or disable automations
 - Browse curated content
 - Read, archive, restore, and delete saved Listen items
-- Run SocialBu AI content tools
 
 Available operations depend on the user's plan, permissions, teams, connected networks, and account types.
 

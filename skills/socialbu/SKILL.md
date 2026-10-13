@@ -18,7 +18,7 @@ Use the SocialBu MCP tools as the source of truth for the authenticated workspac
 
 - For drafts, scheduling, publishing, approvals, deletion, and media, read [references/publishing.md](references/publishing.md).
 - For connected accounts, teams, reconnection, and custom queues, read [references/accounts-and-queues.md](references/accounts-and-queues.md).
-- For performance reporting and SocialBu AI generators, read [references/analytics-and-ai.md](references/analytics-and-ai.md).
+- For performance reporting, read [references/analytics-and-ai.md](references/analytics-and-ai.md).
 - For automations, curated content, and Listen streams or items, read [references/automation-curation-and-listen.md](references/automation-curation-and-listen.md).
 
 ## Operating rules
