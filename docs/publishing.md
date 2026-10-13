@@ -14,7 +14,7 @@ Before creating a tag, update the version in every manifest and run:
 python scripts/validate.py --live --release-tag v1.1.0
 ```
 
-Deploy the backend Claude image-tool filter before publishing. Verify `list_ai_tools` and a blocked image call through an authenticated Claude connection, and confirm its stored OAuth client name starts with `Claude`. The unauthenticated live check only verifies reachability and OAuth discovery.
+The unauthenticated live check only verifies reachability and OAuth discovery. Verify the advertised tool list and representative workflows through an authenticated connection before publishing.
 
 Then push the reviewed tag:
 
