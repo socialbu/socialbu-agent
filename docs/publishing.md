@@ -14,7 +14,7 @@ Before creating a tag, update the version in every manifest and run:
 python scripts/validate.py --live --release-tag v1.1.0
 ```
 
-The unauthenticated live check only verifies reachability and OAuth discovery. Verify the advertised tool list and representative workflows through an authenticated connection before publishing.
+Deploy the [backend AI-wrapper removal](https://bitbucket.org/usamaejaz/socialtool/pull-requests/3665) before publishing the matching package release. Through an authenticated MCP connection, verify that `list_ai_tools` and `use_ai_tool` are absent from every `tools/list` page and that direct calls return tool-not-found errors. The unauthenticated live check only verifies reachability and OAuth discovery.
 
 Then push the reviewed tag:
 
