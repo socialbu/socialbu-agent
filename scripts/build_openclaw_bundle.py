@@ -44,8 +44,11 @@ def build_bundle(output_dir: Path) -> Path:
             "openclaw": {"bundleFormat": "codex", "hostTargets": ["openclaw"]},
         }
         (package / "package.json").write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
-        with tarfile.open(archive, "w:gz") as handle:
-            handle.add(package, arcname="package")
+        # ClawPack accepts USTAR files, not Python's default PAX headers.
+        with tarfile.open(archive, "w:gz", format=tarfile.USTAR_FORMAT) as handle:
+            for source in sorted(package.rglob("*")):
+                if source.is_file():
+                    handle.add(source, arcname="package/" + source.relative_to(package).as_posix())
     return archive
 
 

@@ -15,7 +15,8 @@ class OpenClawBundleTest(unittest.TestCase):
         original = (ROOT / ".mcp.json").read_bytes()
         with tempfile.TemporaryDirectory() as temporary:
             with tarfile.open(build_bundle(Path(temporary)), "r:gz") as archive:
-                members = {item.name for item in archive.getmembers() if item.isfile()}
+                self.assertTrue(all(item.isfile() and not item.pax_headers for item in archive.getmembers()))
+                members = set(archive.getnames())
                 def read_json(name):
                     return json.load(archive.extractfile("package/" + name))
                 package = read_json("package.json")
