@@ -173,6 +173,28 @@ Qwen Code loads this repository as a portable Agent Plugin:
 qwen extensions install socialbu/socialbu-agent
 ```
 
+### OpenClaw
+
+Open **Settings → MCP**, add a server named `socialbu`, choose **Streamable HTTP**, and enter `https://socialbu.com/mcp`. Set `auth` to `oauth` in the scoped configuration editor. The corresponding server configuration is:
+
+```json
+{
+  "mcp": {
+    "servers": {
+      "socialbu": {
+        "url": "https://socialbu.com/mcp",
+        "transport": "streamable-http",
+        "auth": "oauth"
+      }
+    }
+  }
+}
+```
+
+Select **Sign in** for SocialBu and authorize your account in the browser. Verify the connection with `openclaw mcp doctor socialbu --probe` before asking the agent to use SocialBu.
+
+The reusable [`skills/socialbu`](../skills/socialbu) folder can be installed as a skill alongside that connection. See [OpenClaw's MCP guide](https://docs.openclaw.ai/tools/mcp) for installation-specific sign-in and Gateway requirements.
+
 ### Other MCP clients
 
 Use the portable `mcpServers` configuration at the top of this page. The client must support all three of these features:

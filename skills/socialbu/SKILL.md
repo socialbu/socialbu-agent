@@ -1,11 +1,22 @@
 ---
 name: socialbu
 description: Use SocialBu through its MCP server when the user wants to inspect connected social accounts, create or schedule posts, manage queues, analyze performance, work with automations, browse curated content, or manage social listening items. Do not use it for unrelated public social data.
+metadata:
+  openclaw:
+    homepage: https://socialbu.com/mcp-server
 ---
 
 # SocialBu
 
 Use the SocialBu MCP tools as the source of truth for the authenticated workspace and available capabilities.
+
+## Connect
+
+Connect the hosted MCP server at `https://socialbu.com/mcp` using Streamable HTTP and OAuth. Complete authorization in the user's browser on SocialBu. Keep passwords and access tokens out of chat and configuration files.
+
+In OpenClaw, open **Settings → MCP**, add `socialbu` with that URL and the Streamable HTTP transport, and set `auth` to `oauth` in the scoped configuration editor. Select **Sign in**, complete authorization, then check the connection. Follow the [OpenClaw MCP connection guide](https://docs.openclaw.ai/tools/mcp) if the installed version uses different controls.
+
+A SocialBu account is required. SocialBu offers a 7-day free trial; continued use requires a [paid plan](https://socialbu.com/pricing). Installing this skill supplies instructions; connect the MCP server separately if the client does not install it from the package.
 
 ## Establish context
 
