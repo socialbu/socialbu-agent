@@ -175,6 +175,16 @@ qwen extensions install socialbu/socialbu-agent
 
 ### OpenClaw
 
+Install the bundle with both skills and the SocialBu OAuth MCP configuration:
+
+```bash
+openclaw plugins install clawhub:@socialbu/socialbu-agent
+```
+
+Start a new session and use **Settings → MCP → SocialBu → Sign in** to authorize your account in the browser. The bundle declares OAuth explicitly; keep authentication in OpenClaw's credential storage.
+
+For a direct MCP connection, use the configuration below.
+
 Open **Settings → MCP**, add a server named `socialbu`, choose **Streamable HTTP**, and enter `https://socialbu.com/mcp`. Set `auth` to `oauth` in the scoped configuration editor. The corresponding server configuration is:
 
 ```json
