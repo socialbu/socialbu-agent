@@ -14,6 +14,6 @@
   "termsOfServiceUrl": "https://socialbu.com/about/terms",
   "repository": "https://github.com/socialbu/socialbu-agent",
   "mcpServers": "./.mcp.json",
-  "skills": ["./skills/socialbu"],
+  "skills": ["./skills/socialbu", "./skills/social-media-calendar"],
   "keywords": ["socialbu", "social-media", "scheduling", "analytics", "automation", "mcp"]
 }

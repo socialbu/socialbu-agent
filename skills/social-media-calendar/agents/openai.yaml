@@ -1,0 +1,7 @@
+interface:
+  display_name: "Social Media Content Calendar by SocialBu"
+  short_description: "Build content calendars and ready-to-edit social posts"
+  default_prompt: "Use $social-media-calendar to turn my brief into a week of dated social posts with platform-specific drafts and media requirements."
+
+policy:
+  allow_implicit_invocation: true
