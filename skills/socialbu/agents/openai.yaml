@@ -1,8 +1,8 @@
 interface:
-  display_name: "SocialBu"
-  short_description: "Manage social media through SocialBu"
+  display_name: "Social Media Scheduler by SocialBu"
+  short_description: "Schedule and publish social posts with SocialBu"
   brand_color: "#0557F0"
-  default_prompt: "Use $socialbu to show my connected SocialBu accounts."
+  default_prompt: "Use $socialbu to check my scheduled posts and schedule the content I approve for my selected accounts."
 
 dependencies:
   tools:

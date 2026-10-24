@@ -28,7 +28,12 @@ Install the reusable SocialBu skill in clients supported by the Agent Skills ins
 npx skills add socialbu/socialbu-agent
 ```
 
-The skill improves tool selection and safety. Connect the MCP URL as well if the client does not install bundled MCP servers from `mcp.json`.
+Choose the skill for the task:
+
+- [Social Media Scheduler by SocialBu](skills/socialbu): schedule and publish posts, manage connected accounts and queues, and review results through SocialBu.
+- [Social Media Content Calendar by SocialBu](skills/social-media-calendar): turn a brief into a calendar with platform-specific drafts. Planning works without an account; saving or scheduling posts uses SocialBu.
+
+Connect the MCP URL as well when using SocialBu tools if the client does not install bundled MCP servers from `mcp.json`. A SocialBu account is required for those tools; continued use after the 7-day free trial requires a [paid plan](https://socialbu.com/pricing).
 
 ### Gemini CLI
 

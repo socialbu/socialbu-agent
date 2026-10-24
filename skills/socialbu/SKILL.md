@@ -1,14 +1,14 @@
 ---
 name: socialbu
-description: Use SocialBu through its MCP server when the user wants to inspect connected social accounts, create or schedule posts, manage queues, analyze performance, work with automations, browse curated content, or manage social listening items. Do not use it for unrelated public social data.
+description: Schedule and publish social media posts through SocialBu. Use for connected accounts, drafts, publishing queues, analytics, automations, inbox conversations, and social listening. For an unconnected content calendar or editorial plan, use social-media-calendar instead.
 metadata:
   openclaw:
     homepage: https://socialbu.com/mcp-server
 ---
 
-# SocialBu
+# Social Media Scheduler by SocialBu
 
-Use the SocialBu MCP tools as the source of truth for the authenticated workspace and available capabilities.
+Schedule and publish posts, manage your connected accounts and publishing queues, and review results through SocialBu. Use the MCP tools as the source of truth for the authenticated workspace and available capabilities.
 
 ## Connect
 
@@ -24,6 +24,12 @@ A SocialBu account is required. SocialBu offers a 7-day free trial; continued us
 - Call `list_accounts` or `search_accounts` when the destination account is not already identified by a valid ID.
 - Use only accounts and teams returned for the authenticated user.
 - Treat the runtime tool list as authoritative. Plans, permissions, account types, and connected networks can limit operations.
+
+## Schedule social media posts
+
+For a request such as "schedule these posts next week", read [references/publishing.md](references/publishing.md). Resolve the account and timezone, check existing scheduled posts, prepare each destination's content and media, and create only the posts the user authorized. Return their actual IDs, states, and local schedule times.
+
+For a content calendar or draft plan before connecting an account, use the separate `social-media-calendar` skill when it is installed.
 
 ## Choose the relevant workflow
 
