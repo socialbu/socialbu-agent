@@ -41,7 +41,6 @@ def build_bundle(output_dir: Path) -> Path:
             "homepage": plugin["homepage"],
             "repository": plugin["repository"],
             "keywords": plugin["keywords"],
-            "openclaw": {"bundleFormat": "codex", "hostTargets": ["openclaw"]},
         }
         (package / "package.json").write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
         # ClawPack accepts USTAR files, not Python's default PAX headers.

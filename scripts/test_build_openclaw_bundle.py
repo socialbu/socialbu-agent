@@ -23,8 +23,7 @@ class OpenClawBundleTest(unittest.TestCase):
                 self.assertEqual("@socialbu/socialbu-agent", package["name"])
                 self.assertEqual(package["version"], read_json("openclaw.plugin.json")["version"])
                 self.assertEqual(package["version"], read_json(".codex-plugin/plugin.json")["version"])
-                self.assertEqual("codex", package["openclaw"]["bundleFormat"])
-                self.assertNotIn("extensions", package["openclaw"])
+                self.assertNotIn("openclaw", package)
                 server = read_json(".mcp.json")["mcpServers"]["socialbu"]
                 self.assertEqual("https://socialbu.com/mcp", server["url"])
                 self.assertEqual("oauth", server["auth"])
