@@ -73,6 +73,17 @@ jobs:
             gh release create "$RELEASE_TAG" "$archive" --verify-tag --generate-notes --title "SocialBu Agent Plugin $RELEASE_TAG"
           fi
 
+      - name: Attach OpenClaw bundle to the GitHub Release
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python scripts/build_openclaw_bundle.py dist
+          bundle="dist/socialbu-agent-openclaw-${VERSION}.tgz"
+          if ! gh release view "$RELEASE_TAG" --json assets --jq '.assets[].name' | grep -Fxq "$(basename "$bundle")"; then
+            gh release upload "$RELEASE_TAG" "$bundle"
+          fi
+
       - name: Install MCP Registry publisher
         if: github.event_name == 'push' || inputs.publish_registry == true
         run: |

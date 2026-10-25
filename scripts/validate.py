@@ -25,6 +25,7 @@ def validate_files(release_tag: str = "") -> None:
         path: load_json(path)
         for path in (
             "plugin.json",
+            "openclaw.plugin.json",
             "mcp.json",
             ".mcp.json",
             "server.json",
@@ -40,6 +41,7 @@ def validate_files(release_tag: str = "") -> None:
     version = manifests["plugin.json"]["version"]
     for path in (
         "plugin.json",
+        "openclaw.plugin.json",
         "server.json",
         "gemini-extension.json",
         ".codex-plugin/plugin.json",
@@ -64,6 +66,8 @@ def validate_files(release_tag: str = "") -> None:
         assert manifests[path]["name"] == "socialbu-agent", f"Marketplace name mismatch in {path}"
         assert manifests[path]["plugins"][0]["name"] == "socialbu"
 
+    assert manifests["openclaw.plugin.json"]["id"] == "socialbu"
+    assert manifests["openclaw.plugin.json"]["categories"] == ["sales-marketing"]
     assert manifests["gemini-extension.json"]["name"] == "socialbu-agent"
     assert manifests["gemini-extension.json"]["contextFileName"] == "GEMINI.md"
     assert manifests["mcp.json"]["mcpServers"]["socialbu"]["url"] == MCP_URL

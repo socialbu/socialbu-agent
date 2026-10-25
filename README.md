@@ -35,6 +35,16 @@ Choose the skill for the task:
 
 Connect the MCP URL as well when using SocialBu tools if the client does not install bundled MCP servers from `mcp.json`. A SocialBu account is required for those tools; continued use after the 7-day free trial requires a [paid plan](https://socialbu.com/pricing).
 
+### OpenClaw
+
+Install the Social Media Manager bundle, which includes both skills and the SocialBu OAuth MCP connection:
+
+```bash
+openclaw plugins install clawhub:@socialbu/socialbu-agent
+```
+
+Start a new session, then open **Settings → MCP** and select **Sign in** for SocialBu. Authorize your account in the browser.
+
 ### Gemini CLI
 
 ```bash
