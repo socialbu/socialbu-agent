@@ -51,6 +51,11 @@ jobs:
               exit 1
             fi
           fi
+      - name: Check n8n workflow behavior
+        run: |
+          if [[ -f workflows/n8n/approved-sheet-scheduling/workflow.test.mjs ]]; then
+            node --test workflows/n8n/approved-sheet-scheduling/workflow.test.mjs
+          fi
       - name: Check release guards when present in the tag
         run: |
           if [[ -f scripts/test_release.py ]]; then python scripts/test_release.py; fi

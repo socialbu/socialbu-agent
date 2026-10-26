@@ -95,6 +95,10 @@ Available operations depend on the user's plan, permissions, teams, connected ne
 
 The separate [SocialBu CLI](https://github.com/socialbu/socialbu-cli) remains available for terminal scripts and environments that do not support MCP. This plugin does not bundle or duplicate it.
 
+## n8n workflow
+
+[Schedule approved Google Sheets posts with SocialBu](https://github.com/socialbu/socialbu-agent/tree/main/workflows/n8n/approved-sheet-scheduling). Use your existing captions and media, set a posting time per row, and record the scheduling result in your calendar.
+
 ## Support
 
 - [MCP setup page](https://socialbu.com/mcp-server)

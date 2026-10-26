@@ -1,0 +1,810 @@
+{
+  "name": "Schedule approved Google Sheets posts with SocialBu",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "3a5c33a5-8a53-50b9-b812-0eaf8752f3fd",
+      "name": "Run preview",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 5
+            }
+          ]
+        }
+      },
+      "id": "e2d13083-580a-5b41-ad1e-6dd24d4d1c44",
+      "name": "Every five minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"spreadsheet_id\": \"REPLACE_WITH_GOOGLE_SHEET_ID\",\n  \"sheet_name\": \"Posts\",\n  \"preview_only\": true\n}",
+        "options": {}
+      },
+      "id": "fc4ef62c-7d8f-5683-b61b-9df1f39fa4f5",
+      "name": "Settings",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://socialbu.com/api/v1/accounts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 30000,
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "28618d3b-46aa-5960-8651-00d91c08ec85",
+      "name": "Connected accounts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        480,
+        260
+      ],
+      "retryOnFail": false,
+      "onError": "stopWorkflow",
+      "notes": "Select your SocialBu Header Auth credential: Authorization = Bearer YOUR_API_TOKEN.",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/' + encodeURIComponent($('Settings').first().json.spreadsheet_id) + '/values/' + encodeURIComponent(\"'\" + $('Settings').first().json.sheet_name.replace(/'/g, \"''\") + \"'!A:K\") }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "valueRenderOption",
+              "value": "UNFORMATTED_VALUE"
+            },
+            {
+              "name": "dateTimeRenderOption",
+              "value": "FORMATTED_STRING"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000,
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "f766c625-8868-592d-946b-5877c4d2dae6",
+      "name": "Read calendar",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        260
+      ],
+      "notes": "Select your Google Sheets OAuth2 credential. Reading the header row explicitly also supports empty result columns.",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "jsCode": "const settings = $('Settings').first().json;\nif (typeof settings.preview_only !== 'boolean') throw new Error('preview_only must be a boolean.');\nconst accountsResponse = $('Connected accounts').first().json;\nif (accountsResponse.statusCode !== 200 || !Array.isArray(accountsResponse.body)) {\n  throw new Error('Could not load SocialBu accounts. Check the credential before scheduling.');\n}\nconst sheetResponse = $input.first().json;\nconst values = sheetResponse.body?.values;\nconst required = ['row_id', 'account_id', 'team_id', 'content', 'media_url', 'publish_at', 'options_json', 'status', 'socialbu_post_id', 'result', 'attempted_at'];\nif (sheetResponse.statusCode !== 200 || !Array.isArray(values) || !Array.isArray(values[0]) || required.some((key, index) => values[0][index] !== key) || values[0].length !== required.length) {\n  throw new Error('The sheet headers must match calendar.csv in order, including the empty result columns.');\n}\n// Sheets omits trailing empty cells. Keep them empty without confusing them with missing headers.\nconst rows = values.slice(1).map(cells => Object.fromEntries(required.map((key, index) => [key, cells[index] ?? ''])));\nconst ids = new Set();\nfor (const row of rows) {\n  const id = String(row.row_id ?? '').trim();\n  if (id !== String(row.row_id ?? '')) throw new Error('Remove surrounding spaces from row_id before running.');\n  if (id && ids.has(id)) throw new Error('Duplicate row_id: ' + id + '. Fix it before running.');\n  if (id) ids.add(id);\n  if (String(row.status).trim().toLowerCase() === 'approved' && !id) {\n    throw new Error('Every approved row needs a unique row_id.');\n  }\n}\n// shortcut: one row per run keeps each scheduling attempt independent; add batching if volume requires it.\nconst row = rows.find(row => String(row.status).trim().toLowerCase() === 'approved' && !String(row.socialbu_post_id ?? '').trim());\nif (!row) return [];\nconst result = {\n  row_id: String(row.row_id).trim(),\n  socialbu_post_id: '',\n  status: 'needs_fix',\n  result: '',\n  attempted_at: new Date().toISOString(),\n  preview_only: settings.preview_only,\n};\ntry {\n  const accountId = Number(row.account_id);\n  if (!/^[1-9]\\d*$/.test(String(row.account_id)) || !Number.isSafeInteger(accountId)) throw new Error('Use the numeric SocialBu account ID from Connected accounts.');\n  const teamText = String(row.team_id ?? '').trim();\n  const teamId = teamText ? Number(teamText) : null;\n  if (teamText && (!/^[1-9]\\d*$/.test(teamText) || !Number.isSafeInteger(teamId))) throw new Error('team_id must be a SocialBu team ID or empty.');\n  const account = accountsResponse.body.find(account => account.id === accountId && (teamId ? account.team_id === teamId : !account.team_id));\n  if (!account) throw new Error('Account/team combination is unavailable. For a shared account, copy its team_id from Connected accounts.');\n  const content = String(row.content ?? '');\n  const mediaUrl = String(row.media_url ?? '').trim();\n  if (!content.trim() && !mediaUrl) throw new Error('Add approved content or a media URL.');\n  if (account.post_media_required && !mediaUrl) throw new Error('This account requires media.');\n  if (mediaUrl) {\n    if (!/^https:\\/\\/[^/\\s@]+\\/\\S+$/i.test(mediaUrl) || mediaUrl.length > 2048) throw new Error('Use a public HTTPS URL that returns the media file directly.');\n    if (/^https:\\/\\/(?:drive|docs)\\.google\\.com\\//i.test(mediaUrl)) throw new Error('Google Drive sharing pages are not direct media URLs. Use a publicly downloadable image or video URL.');\n  }\n  const iso = String(row.publish_at ?? '').trim();\n  const parts = /^(\\d{4})-(\\d{2})-(\\d{2})T(\\d{2}):(\\d{2}):(\\d{2})(Z|[+-](\\d{2}):(\\d{2}))$/.exec(iso);\n  if (!parts) throw new Error('publish_at must include seconds and a timezone, for example 2027-01-20T09:00:00+05:00.');\n  const [year, month, day, hour, minute, second] = parts.slice(1, 7).map(Number);\n  const local = new Date(Date.UTC(year, month - 1, day, hour, minute, second));\n  if (year < 2000 || local.getUTCFullYear() !== year || local.getUTCMonth() !== month - 1 || local.getUTCDate() !== day || hour > 23 || minute > 59 || second > 59 || Number(parts[8] || 0) > 14 || Number(parts[9] || 0) > 59 || (Number(parts[8]) === 14 && Number(parts[9]) !== 0)) {\n    throw new Error('publish_at contains an invalid date, time, or timezone offset.');\n  }\n  const instant = new Date(iso);\n  if (!Number.isFinite(instant.getTime()) || instant.getTime() < Date.now() + 15 * 60 * 1000) throw new Error('Choose a publish_at at least 15 minutes in the future.');\n  const options = String(row.options_json ?? '').trim() ? JSON.parse(row.options_json) : {};\n  if (!options || Array.isArray(options) || typeof options !== 'object') throw new Error('options_json must be a JSON object.');\n  result.request = { accounts: [accountId], content, publish_at: instant.toISOString().slice(0, 19).replace('T', ' '), draft: false, options };\n  if (teamId) result.request.team_id = teamId;\n  result.media_url = mediaUrl;\n  result.account_name = account.name;\n  result.status = 'processing';\n  result.result = 'Scheduling attempt started. If interrupted, check SocialBu before approving this row again.';\n} catch (error) {\n  result.result = String(error.message).slice(0, 400);\n}\nreturn [{ json: result }];"
+      },
+      "id": "938bd22d-f14d-50fd-a5c5-9e2aad4ff53e",
+      "name": "Prepare row",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c361ec6e-b844-41e7-9e02-91dfe1c9321a",
+              "leftValue": "={{ $json.status === 'processing' && $json.preview_only === false }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "7f683741-ea14-54b7-9445-005a4921ffe0",
+      "name": "Schedule this row",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1200,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "973e205a-94f8-44ee-b415-51d0cd3008f7",
+              "leftValue": "={{ $json.preview_only }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a34df495-5065-5953-9a01-8e1b567c65d6",
+      "name": "Preview only",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1420,
+        580
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ { ...$json, status: $json.status === 'processing' ? 'ready' : $json.status, result: $json.status === 'processing' ? 'Preview only. Review the account, content, media URL, and UTC time before enabling scheduling.' : $json.result } }}",
+        "options": {}
+      },
+      "id": "c9242697-8962-5f90-a617-3e7939783e2a",
+      "name": "Preview result",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1640,
+        580
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "sheet",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Settings').first().json.spreadsheet_id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{ $('Settings').first().json.sheet_name }}",
+          "mode": "name"
+        },
+        "operation": "update",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_id": "={{ $json.row_id }}",
+            "status": "={{ $json.status }}",
+            "socialbu_post_id": "={{ $json.socialbu_post_id }}",
+            "result": "={{ $json.result }}",
+            "attempted_at": "={{ $json.attempted_at }}"
+          },
+          "matchingColumns": [
+            "row_id"
+          ],
+          "schema": [
+            {
+              "id": "row_id",
+              "displayName": "row_id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "socialbu_post_id",
+              "displayName": "socialbu_post_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "result",
+              "displayName": "result",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "attempted_at",
+              "displayName": "attempted_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "cellFormat": "RAW"
+        },
+        "authentication": "oAuth2"
+      },
+      "id": "d085c24a-97bd-50f2-832d-f11d4cd2092a",
+      "name": "Mark processing",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1420,
+        160
+      ],
+      "retryOnFail": false,
+      "notes": "Select the same Google Sheets credential as Read calendar. This updates existing rows by row_id.",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "970d5480-86d3-4ceb-9798-11835dfda29b",
+              "leftValue": "={{ !!$('Prepare row').first().json.media_url }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "eb79a5d9-c651-5b3a-8b79-95045d5512c7",
+      "name": "Has media",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1640,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://socialbu.com/api/v1/upload_media_by_url",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 60000,
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        },
+        "method": "POST",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { url: $('Prepare row').first().json.media_url } }}"
+      },
+      "id": "255db011-a6b4-56bb-97dc-83f90149340d",
+      "name": "Upload media",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1860,
+        0
+      ],
+      "retryOnFail": false,
+      "onError": "continueRegularOutput",
+      "notes": "Select your SocialBu Header Auth credential: Authorization = Bearer YOUR_API_TOKEN.",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "jsCode": "const row = $('Prepare row').first().json;\nconst response = $input.first().json;\nconst body = response.body;\nconst uploaded = response.statusCode >= 200 && response.statusCode < 300 && body?.success === true && typeof body.upload_token === 'string' && body.upload_token.length > 0;\nreturn [{ json: uploaded\n  ? { ...row, upload_token: body.upload_token }\n  : { ...row, status: 'media_error', result: 'Media upload failed; no post was requested. Check the direct file URL and the Upload media execution, then approve the row again.' }\n}];"
+      },
+      "id": "ffc6bc9b-bd2f-5c0a-acf4-f2fd0d70162f",
+      "name": "Check media",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2080,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "3ebea51b-6939-4947-83f2-b8c9edd1ab2e",
+              "leftValue": "={{ $json.status === 'processing' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "91a98820-ef80-5cf4-bc1c-ba0c30238c5e",
+      "name": "Media ready",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2300,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://socialbu.com/api/v1/posts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 30000,
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        },
+        "method": "POST",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { ...$('Prepare row').first().json.request, ...($json.upload_token ? { existing_attachments: [{ upload_token: $json.upload_token }] } : {}) } }}"
+      },
+      "id": "93319661-13bd-5100-84f6-3d8c3b867efa",
+      "name": "Create scheduled post",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2520,
+        220
+      ],
+      "retryOnFail": false,
+      "onError": "continueRegularOutput",
+      "notes": "Select your SocialBu Header Auth credential: Authorization = Bearer YOUR_API_TOKEN.",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "jsCode": "const row = $('Prepare row').first().json;\nconst response = $input.first().json;\nconst body = response.body;\nconst post = Array.isArray(body?.posts) && body.posts.length === 1 ? body.posts[0] : null;\nconst id = Number.isSafeInteger(post?.id) && post.id > 0 ? String(post.id) : '';\n// A timeout or error may happen after the server saved the post. Never retry a create automatically.\nlet status = 'needs_review';\nlet message = 'Creation outcome needs review. Check SocialBu and this execution before approving again.';\nif (response.statusCode >= 200 && response.statusCode < 300 && body?.success === true && id && post.account_id === row.request.accounts[0] && post.publish_at === row.request.publish_at && post.draft === false && post.published === false) {\n  if (post.approved === true) {\n    status = 'scheduled';\n    message = 'Accepted by SocialBu for ' + post.publish_at + ' UTC. Check SocialBu for the final publishing result.';\n  } else if (post.approved === false) {\n    status = 'awaiting_approval';\n    message = 'Created in SocialBu and awaiting team approval.';\n  }\n}\nreturn [{ json: { row_id: row.row_id, status, socialbu_post_id: id, result: message, attempted_at: row.attempted_at } }];"
+      },
+      "id": "4e29bf5c-b3ed-5218-b77b-9ee5dab77bfa",
+      "name": "Record outcome",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2740,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "sheet",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Settings').first().json.spreadsheet_id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{ $('Settings').first().json.sheet_name }}",
+          "mode": "name"
+        },
+        "operation": "update",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_id": "={{ $json.row_id }}",
+            "status": "={{ $json.status }}",
+            "socialbu_post_id": "={{ $json.socialbu_post_id }}",
+            "result": "={{ $json.result }}",
+            "attempted_at": "={{ $json.attempted_at }}"
+          },
+          "matchingColumns": [
+            "row_id"
+          ],
+          "schema": [
+            {
+              "id": "row_id",
+              "displayName": "row_id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "socialbu_post_id",
+              "displayName": "socialbu_post_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "result",
+              "displayName": "result",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "attempted_at",
+              "displayName": "attempted_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "cellFormat": "RAW"
+        },
+        "authentication": "oAuth2"
+      },
+      "id": "ed89d7c7-1773-526c-bd28-5f80ffec3bfc",
+      "name": "Write result",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2960,
+        380
+      ],
+      "retryOnFail": false,
+      "notes": "Select the same Google Sheets credential as Read calendar. This updates existing rows by row_id.",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "content": "## Approved Google Sheets rows to SocialBu\n1. Import calendar.csv into a tab named Posts. Keep all headers.\n2. Set spreadsheet_id in Settings; leave preview_only true.\n3. Select a Google Sheets credential in Read calendar and both Sheets update nodes.\n4. Select a Header Auth credential in all three HTTP nodes: Authorization = Bearer YOUR_API_TOKEN.\n5. Run Connected accounts to find account_id and any team_id.\n6. Approve one future row and run the preview. Review Prepare row / Preview result.\n7. Set preview_only false, test one row, then publish/activate this workflow.\n\nOne row per five-minute run, in sheet order. Keep times at least 15 minutes ahead and allow time for the backlog. No AI credential required.",
+        "height": 480,
+        "width": 600
+      },
+      "id": "045e843c-aebb-55f4-a191-c82a173c662e",
+      "name": "Setup",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -440
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Check before retrying\nscheduled means accepted for scheduling, not published.\nprocessing or needs_review: inspect SocialBu and the execution first. A lost response may hide a saved post. Never automatically retry a failed create or reset these rows.\nawaiting_approval: approve in SocialBu.\nmedia_error / needs_fix: fix the row, then set status to approved.\n\nUse one active workflow per sheet. Pause it before manual runs. Google Sheets is not an atomic lock: overlapping runs can create duplicates. Do not edit a processing row or clear a recorded post ID. See README for recovery and verification limits.",
+        "height": 400,
+        "width": 640
+      },
+      "id": "fbeb096d-5f5a-5cae-a47a-88b51f47b5a3",
+      "name": "Recovery",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2280,
+        -480
+      ]
+    }
+  ],
+  "connections": {
+    "Run preview": {
+      "main": [
+        [
+          {
+            "node": "Settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Every five minutes": {
+      "main": [
+        [
+          {
+            "node": "Settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Settings": {
+      "main": [
+        [
+          {
+            "node": "Connected accounts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Connected accounts": {
+      "main": [
+        [
+          {
+            "node": "Read calendar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read calendar": {
+      "main": [
+        [
+          {
+            "node": "Prepare row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare row": {
+      "main": [
+        [
+          {
+            "node": "Schedule this row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule this row": {
+      "main": [
+        [
+          {
+            "node": "Mark processing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Preview only",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preview only": {
+      "main": [
+        [
+          {
+            "node": "Preview result",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Write result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark processing": {
+      "main": [
+        [
+          {
+            "node": "Has media",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has media": {
+      "main": [
+        [
+          {
+            "node": "Upload media",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create scheduled post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload media": {
+      "main": [
+        [
+          {
+            "node": "Check media",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check media": {
+      "main": [
+        [
+          {
+            "node": "Media ready",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Media ready": {
+      "main": [
+        [
+          {
+            "node": "Create scheduled post",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Write result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create scheduled post": {
+      "main": [
+        [
+          {
+            "node": "Record outcome",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record outcome": {
+      "main": [
+        [
+          {
+            "node": "Write result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Etc/UTC",
+    "executionTimeout": 240,
+    "saveExecutionProgress": false
+  },
+  "pinData": {},
+  "tags": []
+}
