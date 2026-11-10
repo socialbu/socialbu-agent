@@ -43,6 +43,8 @@ jobs:
           python scripts/validate.py "${args[@]}"
           if [[ -f scripts/test_validate.py ]]; then python scripts/test_validate.py; fi
           if [[ -f scripts/test_build_openclaw_bundle.py ]]; then python scripts/test_build_openclaw_bundle.py; fi
+          if [[ -f scripts/sync_claude_package.py ]]; then python scripts/sync_claude_package.py --check; fi
+          if [[ -f scripts/test_sync_claude_package.py ]]; then python scripts/test_sync_claude_package.py; fi
           if [[ -n "$RELEASE_TAG" ]]; then
             test "$(git rev-parse HEAD)" = "$(git rev-parse --verify "refs/tags/$RELEASE_TAG^{commit}")"
             version=$(python -c 'import json; print(json.load(open("plugin.json"))["version"])')
