@@ -9,6 +9,7 @@ For a pull request:
 1. Keep every MCP manifest pointed at `https://socialbu.com/mcp`.
 2. Update all package versions together when releasing a new version.
 3. Keep `skills/socialbu/SKILL.md` focused on real tools exposed by the hosted server.
-4. Run `python scripts/validate.py` before opening the pull request.
+4. Run `python scripts/sync_claude_package.py` after changing shared skills or manifests, and commit the generated changes in `plugins/claude`.
+5. Run `python scripts/validate.py` and `python scripts/sync_claude_package.py --check` before opening the pull request.
 
 Do not add API keys, OAuth tokens, signed upload URLs, account data, or screenshots containing private information.

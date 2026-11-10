@@ -39,8 +39,10 @@ These channels require a form, external pull request, account verification, atte
 | --- | --- |
 | OpenAI Plugins Directory | Upload the release ZIP using **With MCP** in the [OpenAI plugin submission portal](https://platform.openai.com/plugins), then complete domain verification and review details. Hosted MCP servers are scanned daily after publication. |
 | Cursor Marketplace | Submit the public repository at [cursor.com/marketplace/publish](https://cursor.com/marketplace/publish). |
-| Claude directory | Submit the `https://socialbu.com/mcp` connector and plugin bundle from the same organization in [Anthropic's developer portal](https://claude.ai/directory/manage). After approval, plugin updates are picked up from the tracked repository branch. |
+| Claude directory | Submit the `https://socialbu.com/mcp` connector and the `plugins/claude` folder of this repository from the same organization in [Anthropic's developer portal](https://claude.ai/directory/manage). After approval, plugin updates are picked up from the tracked repository branch. |
 | xAI Grok Build marketplace | Open a SHA-pinned contribution against [xai-org/plugin-marketplace](https://github.com/xai-org/plugin-marketplace). |
 | GitHub Copilot | Use the external-plugin submission flow in [github/awesome-copilot](https://github.com/github/awesome-copilot). |
 
 Keep reviewer credentials in the submission portals, never in the repository or release ZIP.
+
+The Claude folder contains only the instructions, remote MCP configuration, license, and listing assets. Run `python scripts/sync_claude_package.py` before committing shared skill or manifest updates; CI rejects an out-of-date folder or unexpected files. Submit `plugins/claude` on `main`, not the repository root, which also contains development scripts and other clients' packaging.
